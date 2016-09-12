@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ManyConsole;
 
 namespace BuildDeploy
 {
     class Program
     {
-        static void Main(string[] args)
+        private static int Main(string[] args)
         {
+            var items = ConsoleCommandDispatcher.FindCommandsInSameAssemblyAs(typeof(Program));
+            return ConsoleCommandDispatcher.DispatchCommand(items, args, System.Console.Out);
         }
     }
 }
