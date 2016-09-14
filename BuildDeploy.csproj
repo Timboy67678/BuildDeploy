@@ -49,6 +49,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>BuildDeploy.XML</DocumentationFile>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F2327991E4937D00A525C86B90F40C733D63B5FF</ManifestCertificateThumbprint>
@@ -101,9 +104,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeployCommand.cs" />
-    <Compile Include="IDeployable.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Command Types\DeployCommand.cs" />
+    <Compile Include="Deployment Types\DeployFTP.cs" />
+    <Compile Include="Deployment Types\DeployHTTP.cs" />
+    <Compile Include="Deployment Types\DeploySFTP.cs" />
+    <Compile Include="Interfaces\IDeployable.cs" />
+    <Compile Include="Main\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
