@@ -75,10 +75,10 @@ namespace BuildDeploy
                 file_names.AddRange(Directory.GetFiles(FileOrWorkingDirectory, string.Format("*.{0}", FilesExtension)));
             else
                 file_names.Add(FileOrWorkingDirectory);
-            
-            foreach(var file in file_names)
+
+            foreach (var file in file_names)
             {
-                Console.WriteLine(file);
+                Console.WriteLine(string.Format("{0}", file));
             }
             
             return 0;
