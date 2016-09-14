@@ -7,27 +7,61 @@ namespace BuildDeploy
 {
     public class DeployCommand : ConsoleCommand
     {
-        private string FileOrWorkingDirectory, DeployHost, DeployPort, FilesExtension;
+        enum DeployMethod
+        {
+            NONE = -1,
+            SFTP,
+            FTP,
+            HTTP,
+        };
+
+        DeployMethod DeployWith;
+
+        private string DeployHostname, DeployTargetPort;
+        private string FileOrWorkingDirectory, FilesExtension;
 
         public DeployCommand()
         {
             IsCommand("deploy", "Deploy applications from directory.");
 
+            HasRequiredOption("mode=", "Specified mode to transfer the files (FTP, SFTP or HTTP only atm)", mode => 
+            {
+                switch (mode.ToLower())
+                {
+                    case "sftp":
+                        DeployWith = DeployMethod.SFTP;
+                        break;
+                    case "ftp":
+                        DeployWith = DeployMethod.FTP;
+                        break;
+                    case "http":
+                        DeployWith = DeployMethod.HTTP;
+                        break;
+                    default:
+                        DeployWith = DeployMethod.NONE;
+                        break;
+                }
+            } );
+
             HasRequiredOption("dir|directory=", "Deploy from directory", dir => FileOrWorkingDirectory = dir);
-            HasRequiredOption("host=", "Target deploying host", host => DeployHost = host);
+            HasRequiredOption("host=", "Target deploying host", host => DeployHostname = host);
             HasOption("ext|extension=", "Targeted files extension", ext => FilesExtension = ext);
-            HasOption("port=", "Target deploying port number", port => DeployPort = port);
+            HasOption("port=", "Target deploying port number", port => DeployTargetPort = port);
         }
 
         public override int Run(string[] remainingArguments)
         {
+            FileAttributes attr;
+
+            if (DeployWith == DeployMethod.NONE)
+            {
+                Console.WriteLine("Deployment mode unknown! Current working modes are SFTP, FTP and HTTP");
+                return 1;
+            }
+
             if (string.IsNullOrEmpty(FilesExtension))
                 FilesExtension = Program.DefaultExtensionSearch;
 
-            if (string.IsNullOrEmpty(DeployPort))
-                DeployPort = Program.DefaultDeployPort;
-
-            FileAttributes attr;
             List<string> file_names = new List<string>();
 
             try {
