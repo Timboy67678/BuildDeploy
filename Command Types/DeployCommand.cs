@@ -15,9 +15,9 @@ namespace BuildDeploy
             HTTP,
         };
 
-        DeployMethod DeployWith;
-        IDeployable Deployment;
-        private string DeployHostname, DeployTargetPort;
+        private DeployMethod DeployWith;
+        private IDeployable Deployment;
+        private string DeployURIPath;
         private string FileOrWorkingDirectory, FilesExtension;
 
         public DeployCommand( )
@@ -31,17 +31,14 @@ namespace BuildDeploy
                      case "ftp":
                          Deployment = new DeployFTP();
                          DeployWith = DeployMethod.FTP;
-                         DeployTargetPort = Program.DefaultFTPPort;
                          break;
                      case "sftp":
                          Deployment = new DeploySFTP();
                          DeployWith = DeployMethod.SFTP;
-                         DeployTargetPort = Program.DefaultSFTPPort;
                          break;
                      case "http":
                          Deployment = new DeployHTTP();
                          DeployWith = DeployMethod.HTTP;
-                         DeployTargetPort = Program.DefaultHTTPPort;
                          break;
                      default:
                          Deployment = null;
@@ -51,15 +48,13 @@ namespace BuildDeploy
              } );
 
             HasRequiredOption( "dir|directory=", "Deploy from directory", dir => FileOrWorkingDirectory = dir );
-            HasRequiredOption( "host=", "Target deploying host", host => DeployHostname = host );
+            HasRequiredOption( "remote=", "Target deploying remote location", remote => DeployURIPath = remote );
             HasOption( "ext|extension=", "Targeted files extension", ext => FilesExtension = ext );
-            HasOption( "port=", "Target deploying port number", port => DeployTargetPort = port );
         }
 
         public override int Run( string[] remainingArguments )
         {
             FileAttributes attr = 0;
-            int port = 0;
             var file_names = new List<string>();
 
             if ( DeployWith == DeployMethod.NONE || Deployment == null)
@@ -71,13 +66,7 @@ namespace BuildDeploy
             if ( string.IsNullOrEmpty( FilesExtension ) )
                 FilesExtension = Program.DefaultExtensionSearch;
 
-            Deployment.HostName = DeployHostname;
-            if ( int.TryParse( DeployTargetPort, out port ) )
-                Deployment.TargetPort = port;
-            else {
-                Console.WriteLine( "Failed to convert port \"{0}\" to integer!", DeployTargetPort );
-                return 1;
-            }
+            Deployment.RequestURI = DeployURIPath;
 
             try {
                 attr = File.GetAttributes( FileOrWorkingDirectory );
@@ -91,7 +80,15 @@ namespace BuildDeploy
             else
                 file_names.Add( FileOrWorkingDirectory );
 
+            if ( file_names.Count == 0 )
+            {
+                Console.WriteLine( "No files found in \"{0}\"", FileOrWorkingDirectory );
+                return 1;
+            }
+
+            Deployment.PreRun( file_names.ToArray() );
             file_names.ForEach( Deployment.RunForFile );
+            Deployment.PostRun();
 
             return 0;
         }

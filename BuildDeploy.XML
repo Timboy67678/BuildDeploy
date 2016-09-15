@@ -10,6 +10,17 @@
             </summary>
             <param name="filePath">The current file (usually a FQP)</param>
         </member>
+        <member name="M:BuildDeploy.IDeployable.PreRun(System.String[])">
+            <summary>
+            Called before we process deployable files
+            </summary>
+            <param name="files">the array of files to process</param>
+        </member>
+        <member name="M:BuildDeploy.IDeployable.PostRun">
+            <summary>
+            Called after we deploy the files
+            </summary>
+        </member>
         <member name="T:BuildDeploy.Properties.Resources">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.

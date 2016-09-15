@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 
 namespace BuildDeploy
 {
     class DeployHTTP : IDeployable
     {
-        public string HostName { get; set; }
-        public int TargetPort { get; set; }
+        public string RequestURI { get; set; }
+        public NetworkCredential LoginInfo { get; set; }
 
         public void RunForFile( string filePath )
+        {
+            //TODO:
+        }
+
+        public void PreRun( string[] files )
+        {
+            //TODO:
+        }
+
+        public void PostRun( )
         {
             //TODO:
         }
