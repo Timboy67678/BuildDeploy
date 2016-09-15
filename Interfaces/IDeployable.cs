@@ -1,10 +1,11 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace BuildDeploy
 {
     public interface IDeployable
     {
-        string RequestURI { get; set; }
+        Uri RequestURI { get; set; }
         NetworkCredential LoginInfo { get; set; }
 
         /// <summary>

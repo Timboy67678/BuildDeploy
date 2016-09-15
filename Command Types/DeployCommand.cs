@@ -17,38 +17,39 @@ namespace BuildDeploy
 
         private DeployMethod DeployWith;
         private IDeployable Deployment;
-        private string DeployURIPath;
+        private Uri DeployFullURI;
         private string FileOrWorkingDirectory, FilesExtension;
 
         public DeployCommand( )
         {
             IsCommand( "deploy", "Deploy applications from directory." );
 
-            HasRequiredOption( "mode=", "Specified mode to transfer the files (FTP, SFTP or HTTP only atm)", mode =>
-             {
-                 switch ( mode.ToLower() )
-                 {
-                     case "ftp":
-                         Deployment = new DeployFTP();
-                         DeployWith = DeployMethod.FTP;
-                         break;
-                     case "sftp":
-                         Deployment = new DeploySFTP();
-                         DeployWith = DeployMethod.SFTP;
-                         break;
-                     case "http":
-                         Deployment = new DeployHTTP();
-                         DeployWith = DeployMethod.HTTP;
-                         break;
-                     default:
-                         Deployment = null;
-                         DeployWith = DeployMethod.NONE;
-                         break;
-                 }
-             } );
+            HasRequiredOption( "remote=", "The remote location URI", remote =>
+            {
+                DeployFullURI = new Uri(remote);
+
+                switch ( DeployFullURI.Scheme.ToLower() )
+                {
+                    case "ftp":
+                        Deployment = new DeployFTP();
+                        DeployWith = DeployMethod.FTP;
+                        break;
+                    case "sftp":
+                        Deployment = new DeploySFTP();
+                        DeployWith = DeployMethod.SFTP;
+                        break;
+                    case "http":
+                        Deployment = new DeployHTTP();
+                        DeployWith = DeployMethod.HTTP;
+                        break;
+                    default:
+                        Deployment = null;
+                        DeployWith = DeployMethod.NONE;
+                        break;
+                }
+            } );
 
             HasRequiredOption( "dir|directory=", "Deploy from directory", dir => FileOrWorkingDirectory = dir );
-            HasRequiredOption( "remote=", "Target deploying remote location", remote => DeployURIPath = remote );
             HasOption( "ext|extension=", "Targeted files extension", ext => FilesExtension = ext );
         }
 
@@ -59,14 +60,14 @@ namespace BuildDeploy
 
             if ( DeployWith == DeployMethod.NONE || Deployment == null)
             {
-                Console.WriteLine( "Deployment mode unknown! Current working modes are FTP, SFTP and HTTP" );
+                Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP, SFTP and HTTP", DeployFullURI.Scheme.ToLower() );
                 return 1;
             }
 
             if ( string.IsNullOrEmpty( FilesExtension ) )
                 FilesExtension = Program.DefaultExtensionSearch;
 
-            Deployment.RequestURI = DeployURIPath;
+            Deployment.RequestURI = DeployFullURI;
 
             try {
                 attr = File.GetAttributes( FileOrWorkingDirectory );

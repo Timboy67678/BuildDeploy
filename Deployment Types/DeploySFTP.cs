@@ -1,10 +1,11 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace BuildDeploy
 {
     class DeploySFTP : IDeployable
     {
-        public string RequestURI { get; set; }
+        public Uri RequestURI { get; set; }
         public NetworkCredential LoginInfo { get; set; }
 
         public void RunForFile( string filePath )

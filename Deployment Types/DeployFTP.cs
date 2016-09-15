@@ -1,10 +1,11 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace BuildDeploy
 {
     class DeployFTP : IDeployable
     {
-        public string RequestURI { get; set; }
+        public Uri RequestURI { get; set; }
         public NetworkCredential LoginInfo { get; set; }
 
         public void RunForFile( string filePath )
@@ -12,7 +13,7 @@ namespace BuildDeploy
             using ( var ftp_client = new WebClient() )
             {
                 ftp_client.Credentials = LoginInfo;
-                ftp_client.BaseAddress = RequestURI;
+                ftp_client.BaseAddress = RequestURI.ToString();
             }
         }
 
