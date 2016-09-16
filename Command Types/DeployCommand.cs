@@ -60,7 +60,7 @@ namespace BuildDeploy
 
             if ( DeployWith == DeployMethod.NONE || Deployment == null)
             {
-                Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP, SFTP and HTTP", DeployFullURI.Scheme.ToLower() );
+                Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP, SFTP and HTTP", DeployFullURI.Scheme.ToUpper() );
                 return 1;
             }
 

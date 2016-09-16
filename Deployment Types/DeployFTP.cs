@@ -14,6 +14,11 @@ namespace BuildDeploy
             {
                 ftp_client.Credentials = LoginInfo;
                 ftp_client.BaseAddress = RequestURI.ToString();
+
+                using ( var write = ftp_client.OpenWrite( RequestURI ) )
+                {
+                    //TODO
+                }
             }
         }
 
