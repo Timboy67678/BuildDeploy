@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 
 namespace BuildDeploy
@@ -8,18 +9,45 @@ namespace BuildDeploy
         public Uri RequestURI { get; set; }
         public NetworkCredential LoginInfo { get; set; }
 
+        public DeployFTP()
+        {
+            LoginInfo = new NetworkCredential( "anonymous", "" );
+        }
+
         public void RunForFile( string filePath )
         {
-            using ( var ftp_client = new WebClient() )
-            {
-                ftp_client.Credentials = LoginInfo;
-                ftp_client.BaseAddress = RequestURI.ToString();
+            FileInfo fileInfo = new FileInfo( filePath );
 
-                using ( var write = ftp_client.OpenWrite( RequestURI ) )
+            if ( !RequestURI.AbsoluteUri.EndsWith( "/" ) )
+                RequestURI = new Uri( string.Format( "{0}/{1}", RequestURI.AbsoluteUri, fileInfo.Name ) );
+
+            FtpWebRequest ftpRequest = (FtpWebRequest) WebRequest.Create( RequestURI.AbsoluteUri + fileInfo.Name );
+            ftpRequest.Credentials = LoginInfo;
+            ftpRequest.UseBinary = true;
+            ftpRequest.ContentLength = fileInfo.Length;
+            ftpRequest.Method = WebRequestMethods.Ftp.UploadFile;
+
+            byte[] fileBuffer = new byte[ fileInfo.Length ];
+
+            try
+            {
+                using ( FileStream fileStream = fileInfo.OpenRead() )
+                using ( Stream ftpStream = ftpRequest.GetRequestStream() )
                 {
-                    //TODO
+                    int numRead = fileStream.Read( fileBuffer, 0, fileBuffer.Length );
+                    ftpStream.Write( fileBuffer, 0, numRead );
                 }
+            } catch( Exception e ) {
+                Console.WriteLine( "Failed to upload \"{0}\" - {1}", fileInfo.Name, e.Message );
+                return;
             }
+
+            FtpWebResponse response = (FtpWebResponse) ftpRequest.GetResponse();
+
+            if ( response.StatusCode != FtpStatusCode.ClosingData )
+                Console.WriteLine( "Failed to upload \"{0}\" - {1}", fileInfo.Name, response.StatusDescription );
+            else
+                Console.WriteLine( "Uploaded \"{0}\" succesfully.", fileInfo.Name );
         }
 
         public void PreRun( string[] files )

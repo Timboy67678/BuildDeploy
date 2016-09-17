@@ -22,12 +22,17 @@ namespace BuildDeploy
 
         public DeployCommand( )
         {
-            IsCommand( "deploy", "Deploy applications from directory." );
+            IsCommand( "deploy", "Deploy applications from directory" );
 
-            HasRequiredOption( "remote=", "The remote location URI", remote =>
+            HasRequiredOption( "remote=", "The remote upload location URI", remote =>
             {
-                DeployFullURI = new Uri(remote);
-
+                try {
+                    DeployFullURI = new Uri( remote );
+                } catch ( UriFormatException e ) {
+                    Console.WriteLine( "Error parsing the remote url - {0}", e.Message );
+                    Environment.Exit( 1 );
+                }
+                
                 switch ( DeployFullURI.Scheme.ToLower() )
                 {
                     case "ftp":
@@ -49,7 +54,9 @@ namespace BuildDeploy
                 }
             } );
 
-            HasRequiredOption( "dir|directory=", "Deploy from directory", dir => FileOrWorkingDirectory = dir );
+            HasRequiredOption( "dir|directory=", "Deploy from specified directory", dir => FileOrWorkingDirectory = dir );
+            HasOption( "user|username=", "Login username", username => Deployment.LoginInfo.UserName = username );
+            HasOption( "pass|password=", "Login password", pass => Deployment.LoginInfo.Password = pass );
             HasOption( "ext|extension=", "Targeted files extension", ext => FilesExtension = ext );
         }
 
