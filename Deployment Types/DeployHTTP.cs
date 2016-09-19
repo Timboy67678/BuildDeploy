@@ -13,9 +13,9 @@ namespace BuildDeploy
             //TODO:
         }
 
-        public void PreRun( string[] files )
+        public bool PreRun( string[] files )
         {
-            //TODO:
+            return true;
         }
 
         public void PostRun( )

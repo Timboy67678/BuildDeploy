@@ -7,15 +7,6 @@ namespace BuildDeploy
 {
     public class DeployCommand : ConsoleCommand
     {
-        enum DeployMethod
-        {
-            NONE = -1,
-            FTP,
-            SFTP,
-            HTTP,
-        };
-
-        private DeployMethod DeployWith;
         private IDeployable Deployment;
         private Uri DeployFullURI;
         private string FileOrWorkingDirectory, FilesExtension;
@@ -28,6 +19,8 @@ namespace BuildDeploy
             {
                 try {
                     DeployFullURI = new Uri( remote );
+                    if ( !DeployFullURI.AbsoluteUri.EndsWith( "/" ) )
+                        DeployFullURI = new Uri( string.Format( "{0}/", DeployFullURI.AbsoluteUri ) );
                 } catch ( UriFormatException e ) {
                     Console.WriteLine( "Error parsing the remote url - {0}", e.Message );
                     Environment.Exit( 1 );
@@ -37,35 +30,43 @@ namespace BuildDeploy
                 {
                     case "ftp":
                         Deployment = new DeployFTP();
-                        DeployWith = DeployMethod.FTP;
                         break;
                     case "sftp":
                         Deployment = new DeploySFTP();
-                        DeployWith = DeployMethod.SFTP;
                         break;
                     case "http":
                         Deployment = new DeployHTTP();
-                        DeployWith = DeployMethod.HTTP;
                         break;
                     default:
                         Deployment = null;
-                        DeployWith = DeployMethod.NONE;
                         break;
                 }
             } );
 
             HasRequiredOption( "dir|directory=", "Deploy from specified directory", dir => FileOrWorkingDirectory = dir );
+            HasOption( "ext|extension=", "Targeted files extension in specified directory", ext => FilesExtension = ext );
+
             HasOption( "user|username=", "Login username", username => Deployment.LoginInfo.UserName = username );
             HasOption( "pass|password=", "Login password", pass => Deployment.LoginInfo.Password = pass );
-            HasOption( "ext|extension=", "Targeted files extension", ext => FilesExtension = ext );
+            HasOption( "privatekey=", "Private key for authentication (used only for SFTP for now)", privatekey_path => 
+            {
+                if ( Deployment.GetType() == typeof( DeploySFTP ) )
+                    ( (DeploySFTP) Deployment ).PrivateKeyPath = privatekey_path;
+            } );
+
+            HasOption( "privatekeypass=", "Private key passphrase (if there is one)", privatekey_pass => 
+            {
+                if ( Deployment.GetType() == typeof( DeploySFTP ) )
+                    ( (DeploySFTP) Deployment ).PrivateKeyPassphrase = privatekey_pass;
+            } );
         }
 
         public override int Run( string[] remainingArguments )
         {
             FileAttributes attr = 0;
-            var file_names = new List<string>();
+            List<string> file_names = new List<string>();
 
-            if ( DeployWith == DeployMethod.NONE || Deployment == null)
+            if ( Deployment == null)
             {
                 Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP, SFTP and HTTP", DeployFullURI.Scheme.ToUpper() );
                 return 1;
@@ -94,9 +95,11 @@ namespace BuildDeploy
                 return 1;
             }
 
-            Deployment.PreRun( file_names.ToArray() );
-            file_names.ForEach( Deployment.RunForFile );
-            Deployment.PostRun();
+            if ( Deployment.PreRun( file_names.ToArray() ) )
+            {
+                file_names.ForEach( Deployment.RunForFile );
+                Deployment.PostRun();
+            }
 
             return 0;
         }

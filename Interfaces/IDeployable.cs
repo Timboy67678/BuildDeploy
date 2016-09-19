@@ -18,7 +18,7 @@ namespace BuildDeploy
         /// Called before we process deployable files
         /// </summary>
         /// <param name="files">the array of files to process</param>
-        void PreRun( string[] files );
+        bool PreRun( string[] files );
 
         /// <summary>
         /// Called after we deploy the files

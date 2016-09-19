@@ -17,10 +17,7 @@ namespace BuildDeploy
         public void RunForFile( string filePath )
         {
             FileInfo fileInfo = new FileInfo( filePath );
-
-            if ( !RequestURI.AbsoluteUri.EndsWith( "/" ) )
-                RequestURI = new Uri( string.Format( "{0}/{1}", RequestURI.AbsoluteUri, fileInfo.Name ) );
-
+            
             FtpWebRequest ftpRequest = (FtpWebRequest) WebRequest.Create( RequestURI.AbsoluteUri + fileInfo.Name );
             ftpRequest.Credentials = LoginInfo;
             ftpRequest.UseBinary = true;
@@ -50,9 +47,9 @@ namespace BuildDeploy
                 Console.WriteLine( "Uploaded \"{0}\" succesfully.", fileInfo.Name );
         }
 
-        public void PreRun( string[] files )
+        public bool PreRun( string[] files )
         {
-            //TODO:
+            return true;
         }
 
         public void PostRun( )
