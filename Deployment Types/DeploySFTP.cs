@@ -39,7 +39,7 @@ namespace BuildDeploy
             {
                 SftpRequest = new Sftp( RequestURI.Host, LoginInfo.UserName, LoginInfo.Password );
                 if ( !string.IsNullOrEmpty( PrivateKeyPath ) )
-                        SftpRequest.AddIdentityFile( PrivateKeyPath, PrivateKeyPassphrase );
+                    SftpRequest.AddIdentityFile( PrivateKeyPath, PrivateKeyPassphrase );
                 SftpRequest.Connect( RequestURI.Port == -1 ? 22 : RequestURI.Port );
             } catch( Exception e ) {
                 Console.WriteLine( "Failed to conect to remote sftp server - {0}", e.Message );
