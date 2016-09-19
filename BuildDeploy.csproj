@@ -125,7 +125,6 @@
   <ItemGroup>
     <Compile Include="Command Types\DeployCommand.cs" />
     <Compile Include="Deployment Types\DeployFTP.cs" />
-    <Compile Include="Deployment Types\DeployHTTP.cs" />
     <Compile Include="Deployment Types\DeploySFTP.cs" />
     <Compile Include="Interfaces\IDeployable.cs" />
     <Compile Include="Main\Program.cs" />

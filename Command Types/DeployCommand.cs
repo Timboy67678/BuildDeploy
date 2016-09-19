@@ -15,7 +15,7 @@ namespace BuildDeploy
         {
             IsCommand( "deploy", "Deploy applications from directory" );
 
-            HasRequiredOption( "remote=", "The remote upload location URI", remote =>
+            HasRequiredOption( "remote=", "The remote upload location URI (only ftp:// and sftp:// are supported as of now)", remote =>
             {
                 try {
                     DeployFullURI = new Uri( remote );
@@ -33,9 +33,6 @@ namespace BuildDeploy
                         break;
                     case "sftp":
                         Deployment = new DeploySFTP();
-                        break;
-                    case "http":
-                        Deployment = new DeployHTTP();
                         break;
                     default:
                         Deployment = null;
@@ -68,7 +65,7 @@ namespace BuildDeploy
 
             if ( Deployment == null)
             {
-                Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP, SFTP and HTTP", DeployFullURI.Scheme.ToUpper() );
+                Console.WriteLine( "Deployment scheme \"{0}\" unsupported! Current working schemes are FTP and SFTP", DeployFullURI.Scheme.ToUpper() );
                 return 1;
             }
 
